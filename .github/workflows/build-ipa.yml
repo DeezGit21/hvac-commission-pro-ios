@@ -7,6 +7,11 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+env:
+  SCHEME: HVACCommissionPro
+  PROJECT: HVACCommissionPro.xcodeproj
+  CONFIGURATION: Release
+
 jobs:
   build:
     runs-on: macos-15
@@ -15,7 +20,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer || sudo xcode-select -s "$(ls -d /Applications/Xcode*.app/Contents/Developer | tail -1)"
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Show Xcode version
+        run: xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -23,30 +31,37 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Show project info
-        run: |
-          ls -la HVACCommissionPro.xcodeproj/
-          xcodebuild -list -project HVACCommissionPro.xcodeproj
+      - name: List schemes
+        run: xcodebuild -list -project $PROJECT
 
-      - name: Build archive (unsigned)
+      - name: Build .app (unsigned, no signing)
         run: |
-          xcodebuild archive \
-            -project HVACCommissionPro.xcodeproj \
-            -scheme HVACCommissionPro \
-            -configuration Release \
-            -archivePath build/HVACCommissionPro.xcarchive \
+          set -ex
+          xcodebuild build \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration "$CONFIGURATION" \
             -destination "generic/platform=iOS" \
+            -derivedDataPath build/DerivedData \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM="" \
-            | tail -50
+            DEVELOPMENT_TEAM=""
 
-      - name: Export IPA (Unsigned)
+      - name: Locate built .app
+        id: locate
         run: |
+          set -ex
+          APP_PATH=$(find build/DerivedData -name "HVACCommissionPro.app" -type d | head -1)
+          echo "app_path=$APP_PATH" >> "$GITHUB_OUTPUT"
+          echo "Found .app at: $APP_PATH"
+          ls -la "$APP_PATH"
+
+      - name: Create unsigned IPA
+        run: |
+          set -ex
           mkdir -p build/Payload
-          APP_PATH=$(find build/HVACCommissionPro.xcarchive -name "HVACCommissionPro.app" -type d | head -1)
-          cp -R "$APP_PATH" build/Payload/
+          cp -R "${{ steps.locate.outputs.app_path }}" build/Payload/
           cd build
           zip -r HVACCommissionPro-unsigned.ipa Payload
           ls -lh HVACCommissionPro-unsigned.ipa
@@ -57,10 +72,3 @@ jobs:
           name: HVACCommissionPro-IPA
           path: build/HVACCommissionPro-unsigned.ipa
           retention-days: 30
-
-      - name: Upload xcarchive artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: HVACCommissionPro-xcarchive
-          path: build/HVACCommissionPro.xcarchive
-          retention-days: 7
