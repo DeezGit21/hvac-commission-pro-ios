@@ -67,8 +67,24 @@ jobs:
           ls -lh HVACCommissionPro-unsigned.ipa
 
       - name: Upload IPA artifact
+        id: artifact
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: HVACCommissionPro-IPA
           path: build/HVACCommissionPro-unsigned.ipa
           retention-days: 30
+
+      - name: Upload IPA to GitHub Release (fallback if artifact quota full)
+        if: steps.artifact.outcome == 'failure'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: IPA-${{ github.run_number }}
+          name: HVAC Commission Pro IPA (Build ${{ github.run_number }})
+          files: build/HVACCommissionPro-unsigned.ipa
+          prerelease: true
+
+      - name: Print download URL
+        run: |
+          echo "IPA built successfully!"
+          echo "Download from: https://github.com/DeezGit21/hvac-commission-pro-ios/releases"
