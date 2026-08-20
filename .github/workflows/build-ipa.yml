@@ -12,6 +12,9 @@ env:
   PROJECT: HVACCommissionPro.xcodeproj
   CONFIGURATION: Release
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-15
