@@ -66,9 +66,8 @@ jobs:
           zip -r HVACCommissionPro-unsigned.ipa Payload
           ls -lh HVACCommissionPro-unsigned.ipa
 
-      - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: HVACCommissionPro-IPA
-          path: build/HVACCommissionPro-unsigned.ipa
-          retention-days: 30
+      - name: Verify IPA exists
+        run: |
+          ls -lh build/HVACCommissionPro-unsigned.ipa
+          echo "✅ IPA built successfully!"
+          file build/HVACCommissionPro-unsigned.ipa
