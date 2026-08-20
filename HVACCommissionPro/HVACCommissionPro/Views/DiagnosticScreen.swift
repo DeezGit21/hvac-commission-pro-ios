@@ -157,14 +157,14 @@ struct DiagnosticScreen: View {
                     viewModel.runDiagnostic(input: input)
                 } label: {
                     HStack {
-                        if case .loading = viewModel.diagnosticState {
+                        if isLoading {
                             ProgressView()
                                 .tint(.darkBg)
                                 .scaleEffect(0.7)
                         } else {
                             Image(systemName: "brain.head.profile")
                         }
-                        Text(case let .loading = viewModel.diagnosticState ? "Analyzing Thermodynamics..." : "Generate Diagnostic & Sales Proposal")
+                        Text(isLoading ? "Analyzing Thermodynamics..." : "Generate Diagnostic & Sales Proposal")
                             .fontWeight(.bold)
                     }
                     .frame(maxWidth: .infinity)

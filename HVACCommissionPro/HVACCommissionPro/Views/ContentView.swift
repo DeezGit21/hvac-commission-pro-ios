@@ -65,7 +65,9 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            viewModel.modelContextWrapper = modelContext
+            if viewModel.modelContextWrapper == nil {
+                viewModel.modelContextWrapper = modelContext
+            }
             viewModel.loadJobs()
         }
     }

@@ -255,7 +255,7 @@ class GeminiHvacService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            throw URLError(.cannotEncodeContentData)
+            throw URLError(.cannotDecodeContentData)
         }
         let base64 = imageData.base64EncodedString()
 

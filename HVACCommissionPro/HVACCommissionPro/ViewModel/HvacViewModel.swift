@@ -1,5 +1,6 @@
 import Foundation
 import UIKit
+import SwiftData
 
 enum FilterTab: String, CaseIterable {
     case all = "All Jobs"
@@ -102,11 +103,14 @@ final class HvacViewModel: ObservableObject {
 
     var selectedWeekPaySummary: WeekPaySummary {
         var cal = Calendar.current
+        let adjustedDate: Date
         if weekOffset != 0 {
-            cal = cal.date(byAdding: .weekOfYear, value: weekOffset, to: Date) ?? Date()
+            adjustedDate = cal.date(byAdding: .weekOfYear, value: weekOffset, to: Date()) ?? Date()
+        } else {
+            adjustedDate = Date()
         }
-        let targetWeek = cal.dateComponents([.weekOfYear], from: cal).weekOfYear ?? 1
-        let targetYear = cal.dateComponents([.yearForWeekOfYear], from: cal).yearForWeekOfYear ?? 2026
+        let targetWeek = cal.dateComponents([.weekOfYear], from: adjustedDate).weekOfYear ?? 1
+        let targetYear = cal.dateComponents([.yearForWeekOfYear], from: adjustedDate).yearForWeekOfYear ?? 2026
         return CommissionEngine.calculateWeekSummary(year: targetYear, weekOfYear: targetWeek, allJobs: allJobs)
     }
 
