@@ -1,0 +1,66 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer || sudo xcode-select -s "$(ls -d /Applications/Xcode*.app/Contents/Developer | tail -1)"
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Show project info
+        run: |
+          ls -la HVACCommissionPro.xcodeproj/
+          xcodebuild -list -project HVACCommissionPro.xcodeproj
+
+      - name: Build archive (unsigned)
+        run: |
+          xcodebuild archive \
+            -project HVACCommissionPro.xcodeproj \
+            -scheme HVACCommissionPro \
+            -configuration Release \
+            -archivePath build/HVACCommissionPro.xcarchive \
+            -destination "generic/platform=iOS" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" \
+            | tail -50
+
+      - name: Export IPA (Unsigned)
+        run: |
+          mkdir -p build/Payload
+          APP_PATH=$(find build/HVACCommissionPro.xcarchive -name "HVACCommissionPro.app" -type d | head -1)
+          cp -R "$APP_PATH" build/Payload/
+          cd build
+          zip -r HVACCommissionPro-unsigned.ipa Payload
+          ls -lh HVACCommissionPro-unsigned.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HVACCommissionPro-IPA
+          path: build/HVACCommissionPro-unsigned.ipa
+          retention-days: 30
+
+      - name: Upload xcarchive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HVACCommissionPro-xcarchive
+          path: build/HVACCommissionPro.xcarchive
+          retention-days: 7

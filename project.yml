@@ -1,0 +1,40 @@
+name: HVACCommissionPro
+options:
+  bundleIdPrefix: com.hvac
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    INFOPLIST_FILE: HVACCommissionPro/HVACCommissionPro/Info.plist
+    PRODUCT_BUNDLE_IDENTIFIER: com.hvac.commission-pro
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_IDENTITY: ""
+    CODE_SIGNING_REQUIRED: "NO"
+    CODE_SIGNING_ALLOWED: "NO"
+    DEVELOPMENT_TEAM: ""
+
+targets:
+  HVACCommissionPro:
+    type: application
+    platform: iOS
+    sources:
+      - path: HVACCommissionPro/HVACCommissionPro
+        excludes:
+          - "Info.plist"
+    resources:
+      - path: HVACCommissionPro/HVACCommissionPro/Info.plist
+        type: file
+    settings:
+      base:
+        INFOPLIST_FILE: HVACCommissionPro/HVACCommissionPro/Info.plist
+        ENABLE_BITCODE: "NO"
+        SWIFT_OBJC_BRIDGING_HEADER: ""
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
+        GENERATE_INFOPLIST_FILE: "NO"

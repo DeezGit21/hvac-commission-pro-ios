@@ -1,0 +1,47 @@
+workflows:
+  hvac-commission-pro:
+    name: HVAC Commission Pro
+    environment:
+      vars:
+        XCODE_PROJECT: HVACCommissionPro.xcodeproj
+        SCHEME: HVACCommissionPro
+        BUNDLE_ID: com.hvac.commission-pro
+      xcode: "16.0"
+    working_directory: /Users/builder/projects
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generate Xcode project
+        script: |
+          cd "$CM_BUILD_DIR"
+          xcodegen generate
+      - name: Build unsigned archive
+        script: |
+          cd "$CM_BUILD_DIR"
+          xcodebuild archive \
+            -project HVACCommissionPro.xcodeproj \
+            -scheme HVACCommissionPro \
+            -configuration Release \
+            -archivePath build/HVACCommissionPro.xcarchive \
+            -destination "generic/platform=iOS" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM=""
+      - name: Create unsigned IPA
+        script: |
+          cd "$CM_BUILD_DIR"
+          mkdir -p build/Payload
+          APP_PATH=$(find build/HVACCommissionPro.xcarchive -name "HVACCommissionPro.app" -type d | head -1)
+          cp -R "$APP_PATH" build/Payload/
+          cd build
+          zip -r HVACCommissionPro-unsigned.ipa Payload
+          ls -lh HVACCommissionPro-unsigned.ipa
+    artifacts:
+      - build/HVACCommissionPro-unsigned.ipa
+      - build/HVACCommissionPro.xcarchive/**/*.app
+    publishing:
+      email:
+        recipients:
+          - dyantzer21@gmail.com
