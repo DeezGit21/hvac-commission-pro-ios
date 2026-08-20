@@ -54,7 +54,6 @@ enum CommissionEngine {
 
     static func getWeekBounds(year: Int, weekOfYear: Int) -> (Date, Date) {
         var cal = Calendar(identifier: .gregorian)
-        cal.firstDayOfWeek = 1  // Sunday (matches Android Calendar.SUNDAY)
         cal.timeZone = TimeZone.current
 
         var components = DateComponents()
